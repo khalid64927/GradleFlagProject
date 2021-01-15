@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: ./app/build/localAARs/featureC-debug.aar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../.gradle/caches/transforms-2/files-2.1/186d0884e4d50c88d64369a9192feb29/jetified-featureC-debug/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../../.gradle/caches/transforms-2/files-2.1/186d0884e4d50c88d64369a9192feb29/jetified-featureC-debug/res" />
+      <root url="file://$PROJECT_DIR$/../../../.gradle/caches/transforms-2/files-2.1/186d0884e4d50c88d64369a9192feb29/jetified-featureC-debug/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
