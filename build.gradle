@@ -1,0 +1,52 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext.kotlin_version = "1.4.21"
+
+    apply from: "${rootDir}/scripts/gradle-build-flags.gradle"
+    apply from: "${rootDir}/scripts/module-helper.gradle"
+
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.2.0-alpha12"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+
+def check = tasks.register("makeAARs") {
+    doFirst {
+        if(useLocalAAR){
+            throw new IllegalStateException(inValidFlag)
+        }
+        println 'Running makeAARs task'
+    }
+}
+
+check.configure {
+    if(useLocalAAR){
+        // if cache is enabled skipping configuration
+        return
+    }
+    println 'configure dependency task'
+    dependsOn = ['featureA:assembleDebug',
+                 'featureB:assembleDebug',
+                 'featureC:assembleDebug',
+                 'featureD:assembleDebug']
+}

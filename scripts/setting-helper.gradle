@@ -1,0 +1,17 @@
+apply from: "${rootDir}/scripts/module-helper.gradle"
+
+ext.includeIfEnabled = { name, path = null ->
+    println("SettingsHelper : module name $name")
+
+    if(!ext.useLocalAAR){
+        println("SettingsHelper : Adding this Module dependency $name")
+        return include(":"+name)
+    }
+
+    if(ext.inDevModules.contains(name)){
+        println("SettingsHelper : Adding this Module dependency $name")
+        return include(":"+name)
+    }
+    println("Not including this module in build !")
+}
+

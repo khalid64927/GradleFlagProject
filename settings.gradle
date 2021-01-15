@@ -1,0 +1,7 @@
+apply from: "${rootDir}/scripts/setting-helper.gradle"
+rootProject.name = "GradleFlagProject"
+include ':app'
+includeIfEnabled 'featureA'
+includeIfEnabled 'featureB'
+includeIfEnabled 'featureC'
+includeIfEnabled 'featureD'

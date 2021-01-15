@@ -1,0 +1,83 @@
+apply from: "${rootDir}/scripts/gradle-build-flags.gradle"
+
+
+ext.includeAAROrModule = { moduleName ->
+    println(" module name - $moduleName")
+    ext.getLocalModuleAarFilePath(moduleName)
+
+    if(!useLocalAAR){
+        println("useLocalAAR flag is not true")
+        return project(":"+moduleName)
+    }
+
+    if(inDevModules.contains("$moduleName")){
+        println("This module "+moduleName+" is dev module, adding it as local module dependency")
+        return project(":"+moduleName)
+    }
+    createCacheFolderIfNotAvailable()
+
+    String singleAAR = ""+ext.localAARDir+"/"+ext.modules.get(moduleName)
+
+    if(ext.checkIfAARInAppCache(moduleName)){
+        return files(singleAAR)
+    }
+
+    if(ext.checkIfAARInModuleCache(moduleName)){
+        copyAARFromModuleToAppCache(moduleName)
+        return files(singleAAR)
+    }
+
+    throw new IllegalStateException(ext.noAARInCache)
+}
+
+
+
+void createCacheFolderIfNotAvailable(){
+    println("dir path $ext.localAARDir")
+    File cacheDirectory  = new File(String.valueOf(ext.localAARDir))
+    if(!cacheDirectory.exists()){
+        println("creating local aar dir in app build folder")
+        cacheDirectory.mkdirs()
+    } else {
+        println("local aar dir available")
+    }
+}
+
+void copyAARFromModuleToAppCache(String moduleName){
+    println("copyAARFromModuleToAppCache")
+    // Expected path of cached aar file
+    String destinationFilePath = ""+ext.localAARDir+"/"+ext.modules.get(moduleName)
+    File destinationAarFile = new File(destinationFilePath)
+
+    String sourceAarFilePath = ext.getLocalModuleAarFilePath(moduleName)
+    File sourceAarFile = new File(sourceAarFilePath)
+
+    println(" source AAR file $sourceAarFilePath")
+    println(" destination AAR file $destinationFilePath")
+
+    copy(sourceAarFile, destinationAarFile)
+    println("aar copied to local cache !")
+}
+
+
+
+void copy(File src, File dest) throws IOException {
+    InputStream is = null; OutputStream os = null;
+    try
+    {
+        is = new FileInputStream(src);
+        os = new FileOutputStream(dest);
+        // buffer size 1K
+        byte[] buf = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = is.read(buf)) > 0)
+        {
+            os.write(buf, 0, bytesRead);
+        } }
+    finally
+    {
+        is.close();
+        os.close();
+    } }
+
+

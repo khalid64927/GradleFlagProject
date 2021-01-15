@@ -1,0 +1,86 @@
+
+/**
+ * module and its local aar list
+ * */
+
+ext {
+
+    modules = [
+            'featureA'    : 'featureA-debug.aar',
+            'featureB'    : 'featureB-debug.aar',
+            'featureC'    : 'featureC-debug.aar',
+            'featureD'    : 'featureD-debug.aar'
+    ]
+
+    localAARDir = "${rootDir}/app/build/localAARs"
+
+    noAARInCache = "AAR files are not generated! \n" +
+                   "Follow below step to resolve this\n" +
+                   "1. Turn off useLocalAAR flag in local.properties\n" +
+                   "2. Run task `./gradlew makeAARs` \n" +
+                   "from command line to generate AAR file for each library module which needs to be used from cache !\n"
+                   "3. (Optional) Declare module name in local.properties (localModules=:fporders :scanandgo) to keep them as module dependency"
+
+    throwable_message = noAARInCache
+
+    inValidFlag = "1. set useLocalAAR in local.properties to false\n" +
+                  "2. Then run gradle sync to load all modules\n" +
+                  "3. Now run the task."
+}
+
+
+def propFile = file("${rootDir}/local.properties")
+if (!propFile.exists()) propFile.createNewFile()
+def props = new Properties()
+propFile.withInputStream { props.load(it) }
+
+ext.useLocalAAR = (hasProperty("useLocalAAR")) ? getProperty("useLocalAAR").toBoolean() : props.getProperty("useLocalAAR", "false").toBoolean()
+ext.inDevModules = (hasProperty("devModules")) ? getProperty("devModules").split(" ") : props.getProperty('devModules', ":default").split(" ")
+
+
+ext.getLocalModuleAarFilePath = { moduleName ->
+    String path = moduleName + "/build/outputs/aar/" + modules.get(moduleName)
+    println " path "+path
+    return path
+}
+
+
+ext.checkIfAARInAppCache = { moduleName ->
+    println("checkIfAARInAppCache")
+    String destinationFilePath = ""+ext.localAARDir+"/"+modules.get(moduleName)
+    File destinationAarFile = new File(destinationFilePath as String)
+    if(destinationAarFile.exists()){
+        println("Local AAR file available in App cache")
+        return true
+    }
+    return false
+
+}
+
+
+ext.checkIfAARInModuleCache = { moduleName ->
+    println("checkIfAARInModuleCache")
+    String moduleAARPath = ext.getLocalModuleAarFilePath(moduleName)
+    println(" moduleAARPath : $moduleAARPath")
+    if(moduleAARPath == null){
+        throw new IllegalStateException("This module is not declared in module hashmap in gradle-build-flags.gradle file !")
+    }
+    File moduleAARFile = new File(moduleAARPath as String)
+    if(moduleAARFile.exists()){
+        println("Local AAR file available in Module cache")
+        return true
+    }
+    println("Local AAR file is not available in Module cache")
+    return false
+
+}
+
+ext.isLocalAARExist = { filePath ->
+    File file = new File(filePath)
+    boolean isAARAvailable = file.exists()
+    if(!isAARAvailable) {
+        println(" AAR is not available at location "+filePath+", you may need to build that module once")
+    }
+    return isAARAvailable
+}
+
